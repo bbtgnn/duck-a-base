@@ -42,7 +42,9 @@
 	"dependencies": {
 		"@popperjs/core": "^2.11.7",
 		"classnames": "^2.3.2",
+		"dexie": "^4.0.1-alpha.10",
 		"flowbite": "^1.6.5",
-		"flowbite-svelte": "^0.36.4"
+		"flowbite-svelte": "^0.36.4",
+		"nanoid": "^4.0.2"
 	}
 }
