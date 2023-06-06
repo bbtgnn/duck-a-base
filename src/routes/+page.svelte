@@ -1,12 +1,15 @@
 <script lang="ts">
-	import AddAttribute from '$lib/partials/addAttribute.svelte';
-	import { DB } from '$lib/types';
+	import CreateDuck from '$lib/partials/createDuck.svelte';
+	import { DBManager } from '$lib/types';
 
-	const db = new DB();
-	db.addAttribute('titolo');
-	db.addAttribute('luogo');
-	db.addAttribute('autore');
-	db.addAttribute('anno');
+	let dbManager = new DBManager();
 </script>
 
-<AddAttribute {db} />
+<div class="flex gap-4 items-stretch h-screen overflow-hidden">
+	<div class="grow p-4">
+		<CreateDuck bind:dbManager />
+	</div>
+	<div class="p-4 bg-gray-100 shrink-0 overflow-scroll">
+		<pre>{JSON.stringify(dbManager, null, 2)}</pre>
+	</div>
+</div>
