@@ -1,129 +1,212 @@
 import { nanoid } from 'nanoid';
 
-export type ID = string;
-export type Table<T> = Record<ID, T>;
-export type Entry<T> = [ID, T];
+//
 
-export enum TypeKind {
+export type ID = string;
+export type Table<Entity, ID extends string = string> = Record<ID, Entity>;
+export type Entry<Entity, ID extends string = string> = [ID, Entity];
+
+//
+
+export interface HasKind<T extends ValueKind> {
+	kind: T;
+}
+
+export enum ValueKind {
 	PRIMITIVE = 'primitive',
 	COMPOSITE = 'composite'
 }
 
-export interface BaseDataType<TypeKind> {
-	name: string;
-	kind: TypeKind;
+export interface CompositeValue extends HasKind<ValueKind.COMPOSITE> {
+	duckId: ID;
 }
 
-export interface PrimitiveDataType extends BaseDataType<TypeKind.PRIMITIVE> {
-	constructor: new (...args: unknown[]) => unknown;
+export function createDefaultCompositeValue(duckId = ''): CompositeValue {
+	return {
+		kind: ValueKind.COMPOSITE,
+		duckId
+	};
 }
 
-export interface CompositeDataType extends BaseDataType<TypeKind.COMPOSITE> {
-	attributes: Array<ID>;
+export interface PrimitiveValue<T = unknown> extends HasKind<ValueKind.PRIMITIVE> {
+	value: T;
 }
 
-export type DataType = PrimitiveDataType | CompositeDataType;
+export function createDefaultPrimitiveValue<T = unknown>(value: T): PrimitiveValue<T> {
+	return {
+		kind: ValueKind.PRIMITIVE,
+		value
+	};
+}
+
+export type Value = PrimitiveValue | CompositeValue;
+
+export type Duck = {
+	props: Table<Value>;
+};
+
+// export function createDuck(properties: Duck['properties'] = {}): Duck {
+// 	return {
+// 		properties
+// 	};
+// }
 
 export type Attribute = {
 	name: string;
-	typeId: string;
 };
 
-export type Duck = {
-	attributes: Table<unknown>;
+// export function createAttribute(props: Partial<Attribute> = {}): Attribute {
+// 	const { name = '' } = props;
+// 	return {
+// 		name
+// 	};
+// }
+
+//
+
+export enum DBEntity {
+	ATTRIBUTES = 'attributes',
+	DUCKS = 'ducks'
+}
+
+export type DB = {
+	[DBEntity.ATTRIBUTES]: Table<Attribute>;
+	[DBEntity.DUCKS]: Table<Duck>;
 };
 
-export class DB {
-	attributes: Table<Attribute>;
-	dataTypes: Table<PrimitiveDataType | CompositeDataType>;
-	ducks: Table<Duck>;
+// export function createDB(): DB {
+// 	return
+// }
+
+//
+
+export class DBManager {
+	db: DB;
 
 	constructor() {
-		this.attributes = {};
-		this.dataTypes = {};
-		this.ducks = {};
-	}
-
-	isAttributeUnique(name: string): boolean {
-		return Object.values(this.attributes).every(
-			(attribute) => attribute.name.toLowerCase() !== name.trim().toLowerCase()
-		);
-	}
-
-	searchAttributes(text: string): Array<Entry<Attribute>> {
-		return Object.entries(this.attributes).filter(([attributeID, attribute]) =>
-			attribute.name.includes(text.trim())
-		);
-	}
-
-	addDuck(): Entry<Duck> {
-		const id = nanoid();
-		const duck: Duck = {
-			attributes: {}
+		this.db = {
+			[DBEntity.ATTRIBUTES]: {},
+			[DBEntity.DUCKS]: {}
 		};
-		this.ducks[id] = duck;
+	}
+
+	duckExists(id: ID): boolean {
+		return id in this.db[DBEntity.DUCKS];
+	}
+
+	createDuck(props: Partial<Duck> = {}): Entry<Duck> {
+		const duck: Duck = {
+			props: {},
+			...props
+		};
+		const id = nanoid();
+		this.db[DBEntity.DUCKS][id] = duck;
 		return [id, duck];
 	}
 
-	addDataType(name = ''): Entry<DataType> {
-		const id = nanoid();
-		const type: DataType = {
-			name,
-			kind: TypeKind.COMPOSITE,
-			attributes: []
-		};
-		this.dataTypes[id] = type;
-		return [id, type];
-	}
-
-	addAttribute(name = ''): Entry<Attribute> {
-		const id = nanoid();
+	createAttribute(props: Partial<Attribute> = {}): Entry<Attribute> {
 		const attribute: Attribute = {
-			name,
-			typeId: ''
+			name: '',
+			...props
 		};
-		this.attributes[id] = attribute;
+		const id = nanoid();
+		this.db[DBEntity.ATTRIBUTES][id] = attribute;
 		return [id, attribute];
 	}
-}
 
-export enum DBEntity {
-	ATTRIBUTE = 'attributes',
-	DATATYPE = 'dataTypes',
-	DUCK = 'ducks'
+	duckHasProps(duck: Duck): boolean {
+		return Object.keys(duck.props).length > 0;
+	}
+
+	// addDuck(): Entry<Duck> {
+	// 	const id = nanoid();
+	// 	const duck = createDuck();
+	// 	return [id, duck];
+	// }
+
+	// addAttribute(name = ''): Entry<Attribute> {
+	// 	const id = nanoid();
+	// 	const attribute = createAttribute(name);
+	// 	this.attributes[id] = attribute;
+	// 	return [id, attribute];
+	// }
+	// isAttributeUnique(name: string): boolean {
+	// 	return Object.values(this.attributes).every(
+	// 		(attribute) => attribute.name.toLowerCase() !== name.trim().toLowerCase()
+	// 	);
+	// }
+
+	// searchAttributes(text: string): Array<Entry<Attribute>> {
+	// 	return Object.entries(this.attributes).filter(([attributeID, attribute]) =>
+	// 		attribute.name.includes(text.trim())
+	// 	);
+	// }
 }
 
 //
 
-export function isComposite(type: DataType): type is CompositeDataType {
-	return type.kind === TypeKind.COMPOSITE;
-}
+// export function isComposite(type: DataType): type is CompositeDataType {
+// 	return type.kind === TypeKind.COMPOSITE;
+// }
 
-export function isPrimitive(type: DataType): type is PrimitiveDataType {
-	return type.kind === TypeKind.PRIMITIVE;
-}
+// export function isPrimitive(type: DataType): type is PrimitiveDataType {
+// 	return type.kind === TypeKind.PRIMITIVE;
+// }
 
-export function isEntryComposite(entry: [ID, DataType]): entry is [ID, CompositeDataType] {
-	return isComposite(entry[1]);
-}
+// export function isEntryComposite(entry: [ID, DataType]): entry is [ID, CompositeDataType] {
+// 	return isComposite(entry[1]);
+// }
 
-export function isEntryPrimitive(entry: [ID, DataType]): entry is [ID, PrimitiveDataType] {
-	return isPrimitive(entry[1]);
-}
+// export function isEntryPrimitive(entry: [ID, DataType]): entry is [ID, PrimitiveDataType] {
+// 	return isPrimitive(entry[1]);
+// }
 
 //
 
-export const defaultDataType: DataType = {
-	name: '',
-	kind: TypeKind.COMPOSITE,
-	attributes: []
-};
+// export const defaultDataType: DataType = {
+// 	name: '',
+// 	kind: TypeKind.COMPOSITE,
+// 	attributes: []
+// };
 
-export const defaultAttribute: Attribute = {
-	name: '',
-	typeId: ''
-};
+// export const defaultAttribute: Attribute = {
+// 	name: '',
+// 	typeId: ''
+// };
 
-export const defaultDuck: Duck = {
-	attributes: {}
-};
+// export const defaultDuck: Duck = {
+// 	attributes: {}
+// };
+
+// //
+
+// export enum TypeKind {
+// 	PRIMITIVE = 'primitive',
+// 	COMPOSITE = 'composite'
+// }
+
+// export interface BaseDataType<TypeKind> {
+// 	name: string;
+// 	kind: TypeKind;
+// }
+
+// export interface PrimitiveDataType extends BaseDataType<TypeKind.PRIMITIVE> {
+// 	constructor: new (...args: unknown[]) => unknown;
+// }
+
+// export interface CompositeDataType extends BaseDataType<TypeKind.COMPOSITE> {
+// 	attributes: Array<ID>;
+// }
+
+// export type DataType = PrimitiveDataType | CompositeDataType;
+
+// export type DataType = unknown | Table<Duck>;
+
+// export type Attribute = {
+// 	name: string;
+// 	typeId: string;
+// };
+
+// export type Duck = {
+// 	attributes: Table<unknown>;
+// };
