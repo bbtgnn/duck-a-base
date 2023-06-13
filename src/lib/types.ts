@@ -114,6 +114,10 @@ export class DBManager {
 		return [id, attribute];
 	}
 
+	duckHasProps(duck: Duck): boolean {
+		return Object.keys(duck.props).length > 0;
+	}
+
 	// addDuck(): Entry<Duck> {
 	// 	const id = nanoid();
 	// 	const duck = createDuck();

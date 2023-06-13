@@ -1,13 +1,24 @@
 <script lang="ts">
-	import CreateDuck from '$lib/partials/createDuck.svelte';
+	import EditDuck from '$lib/partials/editDuck.svelte';
 	import { DBManager } from '$lib/types';
+	import { Button } from 'flowbite-svelte';
 
 	let dbManager = new DBManager();
+
+	function addDuck() {
+		dbManager.createDuck();
+		dbManager = dbManager;
+	}
+
+	addDuck();
 </script>
 
 <div class="flex gap-4 items-stretch h-screen overflow-hidden">
-	<div class="grow p-4">
-		<CreateDuck bind:dbManager />
+	<div class="grow p-4 space-y-4 flex flex-col">
+		{#each Object.keys(dbManager.db.ducks) as id (id)}
+			<EditDuck {dbManager} {id} bind:duck={dbManager.db.ducks[id]} />
+		{/each}
+		<Button on:click={addDuck} color="alternative">+ Add duck</Button>
 	</div>
 	<div class="p-4 bg-gray-100 shrink-0 overflow-scroll">
 		<pre>{JSON.stringify(dbManager, null, 2)}</pre>

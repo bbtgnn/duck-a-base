@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { ValueKind, type Entry, type Value, DBManager } from '$lib/types';
+	import { ValueKind, type Value, DBManager } from '$lib/types';
 	import { Input, Label } from 'flowbite-svelte';
-	import CreateDuck from './createDuck.svelte';
+	import EditDuck from './editDuck.svelte';
 
 	export let dbManager: DBManager;
 	export let property: Value;
@@ -16,7 +16,7 @@
 		<Input bind:value={property.value} />
 	{:else if property.kind == ValueKind.COMPOSITE}
 		<div class="pl-8">
-			<CreateDuck {dbManager} duckId={property.duckId} />
+			<EditDuck {dbManager} id={property.duckId} duck={dbManager.db.ducks[property.duckId]} />
 		</div>
 	{/if}
 </div>
