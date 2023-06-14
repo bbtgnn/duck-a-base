@@ -8,59 +8,49 @@ export type Entry<Entity, ID extends string = string> = [ID, Entity];
 
 //
 
-export interface HasKind<T extends ValueKind> {
+export interface PropTemplate<T extends PropKind> {
+	attributeId: ID;
 	kind: T;
 }
 
-export enum ValueKind {
+export enum PropKind {
 	PRIMITIVE = 'primitive',
 	COMPOSITE = 'composite'
 }
 
-export interface CompositeValue extends HasKind<ValueKind.COMPOSITE> {
+export interface CompositeProp extends PropTemplate<PropKind.COMPOSITE> {
 	duckId: ID;
 }
 
-export function createDefaultCompositeValue(duckId = ''): CompositeValue {
+export function createDefaultCompositeProp(attributeId = '', duckId = ''): CompositeProp {
 	return {
-		kind: ValueKind.COMPOSITE,
+		attributeId,
+		kind: PropKind.COMPOSITE,
 		duckId
 	};
 }
 
-export interface PrimitiveValue<T = unknown> extends HasKind<ValueKind.PRIMITIVE> {
+export interface PrimitiveProp<T = unknown> extends PropTemplate<PropKind.PRIMITIVE> {
 	value: T;
 }
 
-export function createDefaultPrimitiveValue<T = unknown>(value: T): PrimitiveValue<T> {
+export function createDefaultPrimitiveProp(attributeId = '', value = null): PrimitiveProp {
 	return {
-		kind: ValueKind.PRIMITIVE,
+		attributeId,
+		kind: PropKind.PRIMITIVE,
 		value
 	};
 }
 
-export type Value = PrimitiveValue | CompositeValue;
+export type Prop = PrimitiveProp | CompositeProp;
 
 export type Duck = {
-	props: Table<Value>;
+	props: Table<Prop>;
 };
-
-// export function createDuck(properties: Duck['properties'] = {}): Duck {
-// 	return {
-// 		properties
-// 	};
-// }
 
 export type Attribute = {
 	name: string;
 };
-
-// export function createAttribute(props: Partial<Attribute> = {}): Attribute {
-// 	const { name = '' } = props;
-// 	return {
-// 		name
-// 	};
-// }
 
 //
 
@@ -94,10 +84,9 @@ export class DBManager {
 		return id in this.db[DBEntity.DUCKS];
 	}
 
-	createDuck(props: Partial<Duck> = {}): Entry<Duck> {
+	createDuck(): Entry<Duck> {
 		const duck: Duck = {
-			props: {},
-			...props
+			props: {}
 		};
 		const id = nanoid();
 		this.db[DBEntity.DUCKS][id] = duck;
@@ -116,6 +105,10 @@ export class DBManager {
 
 	duckHasProps(duck: Duck): boolean {
 		return Object.keys(duck.props).length > 0;
+	}
+
+	duckAddEmptyProp(id: ID): void {
+		this.db[DBEntity.DUCKS][id].props[nanoid()] = createDefaultPrimitiveProp();
 	}
 
 	// addDuck(): Entry<Duck> {
