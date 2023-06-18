@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ValueKind, DBManager, type Duck } from '$lib/types';
+	import { PropKind, DBManager, type Duck } from '$lib/types';
 	import { Input, Label, Select, Button } from 'flowbite-svelte';
 	import type { SelectOptionType } from 'flowbite-svelte/dist/types';
 
@@ -7,9 +7,9 @@
 	export let props: Duck['props'];
 
 	export let name = '';
-	export let kind: ValueKind = ValueKind.PRIMITIVE;
+	export let kind: PropKind = PropKind.PRIMITIVE;
 
-	const selectOptions: SelectOptionType[] = Object.values(ValueKind).map((kind) => ({
+	const selectOptions: SelectOptionType[] = Object.values(PropKind).map((kind) => ({
 		value: kind,
 		name: kind
 	}));
@@ -17,14 +17,14 @@
 	function handleClick() {
 		if (!Boolean(name) && !Boolean(kind)) return;
 		const [attributeId, attribute] = dbManager.createAttribute({ name });
-		if (kind == ValueKind.COMPOSITE) {
+		if (kind == PropKind.COMPOSITE) {
 			const [duckId, duck] = dbManager.createDuck();
 			props[attributeId] = { kind, duckId };
 		} else {
 			props[attributeId] = { kind, value: '' };
 		}
 		name = '';
-		kind = ValueKind.PRIMITIVE;
+		kind = PropKind.PRIMITIVE;
 	}
 </script>
 
