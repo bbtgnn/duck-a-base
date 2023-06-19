@@ -16,6 +16,7 @@
 	dbManager.createAttribute('age');
 </script>
 
+<h1>Titolo aggiunto</h1>
 <div class="flex gap-4 items-stretch h-screen overflow-hidden">
 	<div class="grow p-4 space-y-4 flex flex-col overflow-y-auto">
 		{#each Object.entries(dbManager.db.ducks) as [duckId, duck] (duckId)}
