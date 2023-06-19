@@ -12,18 +12,18 @@
 		dbManager = dbManager;
 	}
 
-	if (Object.keys(duck.props).length === 0) addProp();
+	if (Object.keys(duck.properties).length === 0) addProp();
 </script>
 
 <div
 	class="bg-gray-50 border border-gray-300 rounded-lg overflow-hidden flex flex-col divide-y divide-gray-300"
 >
-	<div class="p-4">
+	<div class="px-4 py-2">
 		<p class="font-mono">ID: {duckId}</p>
 	</div>
-	<div class="p-4 space-y-4 flex flex-col">
-		{#each Object.entries(duck.props) as [propID, prop]}
-			<EditProperty {dbManager} bind:prop={duck.props[propID]} />
+	<div class="px-4 py-8 space-y-8 flex flex-col">
+		{#each Object.entries(duck.properties) as [propertyId, property]}
+			<EditProperty {dbManager} {duckId} {propertyId} bind:property={duck.properties[propertyId]} />
 		{/each}
 		<Button on:click={addProp} color="alternative">+ Add prop</Button>
 	</div>

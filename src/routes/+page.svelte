@@ -12,15 +12,15 @@
 
 	if (Object.values(dbManager.db.ducks).length === 0) addDuck();
 
-	dbManager.createAttribute({ name: 'name' });
-	dbManager.createAttribute({ name: 'age' });
+	dbManager.createAttribute('name');
+	dbManager.createAttribute('age');
 </script>
 
 <div class="flex gap-4 items-stretch h-screen overflow-hidden">
 	<div class="grow p-4 space-y-4 flex flex-col overflow-y-auto">
 		{#each Object.entries(dbManager.db.ducks) as [duckId, duck] (duckId)}
 			<div class="shrink-0">
-				<EditDuck {dbManager} bind:duck={dbManager.db.ducks[duckId]} {duckId} />
+				<EditDuck {dbManager} {duckId} bind:duck={dbManager.db.ducks[duckId]} />
 			</div>
 		{/each}
 		<Button on:click={addDuck} color="alternative">+ Add duck</Button>
